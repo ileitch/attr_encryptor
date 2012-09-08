@@ -133,10 +133,7 @@ module AttrEncryptor
       attr_reader (encrypted_attribute_name.to_s + "_salt").to_sym unless instance_methods_as_symbols.include?((encrypted_attribute_name.to_s + "_salt").to_sym )
       attr_writer (encrypted_attribute_name.to_s + "_salt").to_sym unless instance_methods_as_symbols.include?((encrypted_attribute_name.to_s + "_salt").to_sym )
 
-
-
       define_method(attribute) do
-
         load_iv_for_attribute(attribute,encrypted_attribute_name, options[:algorithm])
         load_salt_for_attribute(attribute,encrypted_attribute_name)
 
@@ -160,7 +157,6 @@ module AttrEncryptor
     end
   end
   alias_method :attr_encryptor, :attr_encrypted
-
 
   # Default options to use with calls to <tt>attr_encrypted</tt>
   #

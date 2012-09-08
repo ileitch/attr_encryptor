@@ -96,4 +96,16 @@ class ActiveRecordTest < Test::Unit::TestCase
     Account.create!(:key => SECRET_KEY, :password => "password")
     Account.create!(:password => "password" , :key => SECRET_KEY)
   end
+
+  def test_should_forward_changed_to_the_encrypted_attribute
+    person = Person.create :email => 'test@example.com'
+    person.email = 'new@example.com'
+    assert person.email_changed?
+  end
+
+  def test_should_forward_change_to_the_encrypted_attribute
+    person = Person.create :email => 'test@example.com'
+    person.email = 'new@example.com'
+    assert_equal person.email_change, ['test@example.com', 'new@example.com']
+  end
 end
