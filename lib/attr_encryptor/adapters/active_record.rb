@@ -79,7 +79,7 @@ if defined?(ActiveRecord::Base)
               end
             end
 
-            opts = Hash[*opts.flatten]
+            opts = Hash[*opts.flatten(1)]
           end
           where_without_attr_encryptor(opts, *rest)
         end
