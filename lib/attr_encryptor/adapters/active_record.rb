@@ -8,6 +8,7 @@ if defined?(ActiveRecord::Base)
               alias_method_chain :attr_encrypted, :defined_attributes
               alias_method_chain :attr_encryptor, :defined_attributes
               alias_method_chain :method_missing, :attr_encryptor
+              alias_method_chain :where, :attr_encryptor
             end
 
             attr_encrypted_options[:encode] = true
@@ -65,6 +66,20 @@ if defined?(ActiveRecord::Base)
             method = "#{match.captures[0]}_#{match.captures[1]}_#{attribute_names.join('_and_')}".to_sym
           end
           method_missing_without_attr_encryptor(method, *args, &block)
+        end
+
+        def where_with_attr_encryptor(opts, *rest)
+          new_opts = opts.map do |attribute, value|
+            if attr_encrypted?(attribute)
+              new_value = send("encrypt_#{attribute}", value)
+              [encrypted_attributes[attribute.to_sym][:attribute], new_value]
+            else
+              [attribute, value]
+            end
+          end
+
+          new_opts = Hash[*new_opts.flatten]
+          where_without_attr_encryptor(new_opts, *rest)
         end
       end
     end

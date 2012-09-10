@@ -115,8 +115,13 @@ class ActiveRecordTest < Test::Unit::TestCase
     assert_equal person.email_was, 'test@example.com'
   end
 
-  def test_should_implement_dynamic_finders
+  def test_should_translate_dynamic_finders
     person = Person.create :email => 'test@example.com'
     assert_equal Person.find_by_email('test@example.com'), person
+  end
+
+  def test_should_translate_where
+    person = Person.create :email => 'test@example.com'
+    assert_equal Person.where(:email => 'test@example.com').first, person
   end
 end
