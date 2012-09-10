@@ -334,11 +334,13 @@ module AttrEncryptor
       end
 
       def load_salt_for_attribute(attribute, encrypted_attribute_name)
-        salt = send("#{encrypted_attribute_name.to_s + "_salt"}") || send("#{encrypted_attribute_name.to_s + "_salt"}=", Digest::SHA256.hexdigest((Time.now.to_i * rand(1000)).to_s)[0..15])
+        salt = send("#{encrypted_attribute_name.to_s + "_salt"}") || send("#{encrypted_attribute_name.to_s + "_salt"}=", salt_for_attribute(attribute))
         self.class.encrypted_attributes[attribute.to_sym] = self.class.encrypted_attributes[attribute.to_sym].merge(:salt => salt)
       end
 
-
+      def salt_for_attribute(attribute)
+        Digest::SHA256.hexdigest((Time.now.to_i * rand(1000)).to_s)[0..15]
+      end
   end
 end
 
