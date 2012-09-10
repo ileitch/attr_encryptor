@@ -124,4 +124,18 @@ class ActiveRecordTest < Test::Unit::TestCase
     person = Person.create :email => 'test@example.com'
     assert_equal Person.where(:email => 'test@example.com').first, person
   end
+
+  def test_should_not_translate_string_predicate_in_where
+    person = Person.create :email => 'test@example.com'
+    assert_raise ActiveRecord::StatementInvalid do
+      Person.where("email = 'test@example.com'").first
+    end
+  end
+
+  def test_should_not_translate_array_predicate_in_where
+    person = Person.create :email => 'test@example.com'
+    assert_raise ActiveRecord::StatementInvalid do
+      Person.where(['email = ?', 'test@example.com']).first
+    end
+  end
 end

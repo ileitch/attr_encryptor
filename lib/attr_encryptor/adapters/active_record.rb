@@ -69,17 +69,19 @@ if defined?(ActiveRecord::Base)
         end
 
         def where_with_attr_encryptor(opts, *rest)
-          new_opts = opts.map do |attribute, value|
-            if attr_encrypted?(attribute)
-              new_value = send("encrypt_#{attribute}", value)
-              [encrypted_attributes[attribute.to_sym][:attribute], new_value]
-            else
-              [attribute, value]
+          if opts.is_a?(Hash)
+            opts = opts.map do |attribute, value|
+              if attr_encrypted?(attribute)
+                new_value = send("encrypt_#{attribute}", value)
+                [encrypted_attributes[attribute.to_sym][:attribute], new_value]
+              else
+                [attribute, value]
+              end
             end
-          end
 
-          new_opts = Hash[*new_opts.flatten]
-          where_without_attr_encryptor(new_opts, *rest)
+            opts = Hash[*opts.flatten]
+          end
+          where_without_attr_encryptor(opts, *rest)
         end
       end
     end
