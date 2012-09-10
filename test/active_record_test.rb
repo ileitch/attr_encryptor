@@ -108,4 +108,10 @@ class ActiveRecordTest < Test::Unit::TestCase
     person.email = 'new@example.com'
     assert_equal person.email_change, ['test@example.com', 'new@example.com']
   end
+
+  def test_should_forward_was_to_the_encrypted_attribute
+    person = Person.create :email => 'test@example.com'
+    person.email = 'new@example.com'
+    assert_equal person.email_was, 'test@example.com'
+  end
 end
