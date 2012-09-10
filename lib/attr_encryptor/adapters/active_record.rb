@@ -7,6 +7,7 @@ if defined?(ActiveRecord::Base)
             class << self
               alias_method_chain :attr_encrypted, :defined_attributes
               alias_method_chain :attr_encryptor, :defined_attributes
+              alias_method_chain :method_missing, :attr_encryptor
             end
 
             attr_encrypted_options[:encode] = true
@@ -36,6 +37,35 @@ if defined?(ActiveRecord::Base)
         end
 
         alias attr_encryptor_with_defined_attributes attr_encrypted_with_defined_attributes
+
+        # Allows you to use dynamic methods like <tt>find_by_email</tt> or <tt>scoped_by_email</tt> for
+        # encrypted attributes
+        #
+        # This is useful for encrypting fields like email addresses. Your user's email addresses
+        # are encrypted in the database, but you can still look up a user by email for logging in
+        #
+        # Example
+        #
+        #   class User < ActiveRecord::Base
+        #     attr_encrypted :email, :key => 'secret key'
+        #   end
+        #
+        #   User.find_by_email_and_password('test@example.com', 'testing')
+        #   # results in a call to
+        #   User.find_by_encrypted_email_and_password('the_encrypted_version_of_test@example.com', 'testing')
+        def method_missing_with_attr_encryptor(method, *args, &block)
+          if match = /^(find|scoped)_(all_by|by)_([_a-zA-Z]\w*)$/.match(method.to_s)
+            attribute_names = match.captures.last.split('_and_')
+            attribute_names.each_with_index do |attribute, index|
+              if attr_encrypted?(attribute)
+                args[index] = send("encrypt_#{attribute}", args[index])
+                attribute_names[index] = encrypted_attributes[attribute.to_sym][:attribute]
+              end
+            end
+            method = "#{match.captures[0]}_#{match.captures[1]}_#{attribute_names.join('_and_')}".to_sym
+          end
+          method_missing_without_attr_encryptor(method, *args, &block)
+        end
       end
     end
   end
