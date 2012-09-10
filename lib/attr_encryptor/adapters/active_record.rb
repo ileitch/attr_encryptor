@@ -24,6 +24,10 @@ if defined?(ActiveRecord::Base)
           encrypted_attributes.each do |attr, args|
             encrypted_attr = args[:attribute]
             define_method("#{attr}_changed?") { send("#{encrypted_attr}_changed?") }
+            define_method("#{attr}_was") do
+              changed = send("#{encrypted_attr}_change")
+              decrypt(attr, changed.first)
+            end
             define_method("#{attr}_change") do
               changed = send("#{encrypted_attr}_change")
               [decrypt(attr, changed.first), decrypt(attr, changed.last)]
