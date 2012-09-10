@@ -323,9 +323,7 @@ module AttrEncryptor
         iv = send("#{encrypted_attribute_name.to_s + "_iv"}")
           if(iv == nil)
             begin
-              algorithm = algorithm || "aes-256-cbc"
-              algo = OpenSSL::Cipher::Cipher.new(algorithm)
-              iv = [algo.random_iv].pack("m")
+              iv = iv_for_attribute(attribute)
               send("#{encrypted_attribute_name.to_s + "_iv"}=", iv)
             rescue RuntimeError
             end
@@ -340,6 +338,12 @@ module AttrEncryptor
 
       def salt_for_attribute(attribute)
         Digest::SHA256.hexdigest((Time.now.to_i * rand(1000)).to_s)[0..15]
+      end
+
+      def iv_for_attribute(attribute)
+        algorithm = algorithm || "aes-256-cbc"
+        algo = OpenSSL::Cipher::Cipher.new(algorithm)
+        iv = [algo.random_iv].pack("m")
       end
   end
 end
